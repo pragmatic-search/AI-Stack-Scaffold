@@ -5,15 +5,19 @@ services:
     ports: ["3000:3000"]
     depends_on:
       - backend
-    environment:
-      - NODE_ENV=development
 
   backend:
     build: ./backend
     ports: ["8000:8000"]
-    environment:
-      - ENV=development
+    depends_on:
+      - db
 
-networks:
-  default:
-    name: prodigal-network
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

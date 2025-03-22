@@ -1,6 +1,9 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from .chatbot import get_reply
+from .auth import get_password_hash, verify_password
+from .models import User
+from .database import SessionLocal, engine
+from sqlalchemy.orm import Session
 
 app = FastAPI()
 
@@ -10,15 +13,25 @@ app.add_middleware(
     allow_methods=["*"],
 )
 
-@app.post("/chat")
-async def chat(request: Request):
-    data = await request.json()
-    return get_reply(data["message"])
+# Database dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-@app.get("/")
-def read_root():
-    return {"message": "Hello from FastAPI!"}
+@app.post("/register")
+def register(email: str, password: str, db: Session = Depends(get_db)):
+    hashed_password = get_password_hash(password)
+    db_user = User(email=email, hashed_password=hashed_password)
+    db.add(db_user)
+    db.commit()
+    return {"message": "User created"}
 
-@app.get("/health")
-def health_check():
-    return {"status": "OK"}
+@app.post("/login")
+def login(email: str, password: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user or not verify_password(password, user.hashed_password):
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+    return {"message": "Logged in"}
