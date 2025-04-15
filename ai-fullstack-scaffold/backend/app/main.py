@@ -13,7 +13,6 @@ app.add_middleware(
     allow_methods=["*"],
 )
 
-# Database dependency
 def get_db():
     db = SessionLocal()
     try:
