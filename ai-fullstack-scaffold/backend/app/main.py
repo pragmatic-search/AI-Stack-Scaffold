@@ -45,3 +45,16 @@ def predict(prompt: str):
         return {"response": result}
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
+
+from .kafka_consumer import stream_logs
+from .dashboard_data import generate_summary
+
+@app.get("/dashboard")
+def dashboard():
+    # Collect only the first 10 messages to avoid long delay
+    logs = []
+    for i, log in enumerate(stream_logs()):
+        logs.append(log)
+        if i >= 9: break
+    summary = generate_summary(logs)
+    return summary

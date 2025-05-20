@@ -1,0 +1,7 @@
+{
+    "bootstrap.servers": "localhost:9092",
+    "topic": "inference_logs",
+    "partitions": 1,
+    "replication.factor": 1
+  }
+  
