@@ -1,12 +1,12 @@
-# Day 31-45: Backend API + Auth
+# Day 46–60: AI Model Integration
 
 ## New Features
-- JWT Authentication
-- PostgreSQL Database
-- User registration/login
+- Integrated HuggingFace GPT-2 model
+- `/predict` endpoint for text generation
 
 ## Setup
-1. Run `docker-compose up`
-2. Access:
-   - Frontend: http://localhost:3000
-   - Backend docs: http://localhost:8000/docs
+1. Ensure Docker container has enough memory (~4GB min)
+2. Run `docker-compose up`
+3. POST to `/predict` with `{ "prompt": "Hello world" }`
+
+## Endpoint Sample

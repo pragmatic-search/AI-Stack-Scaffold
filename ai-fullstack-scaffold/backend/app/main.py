@@ -2,7 +2,9 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from .auth import get_password_hash, verify_password
 from .models import User
-from .database import SessionLocal, engine
+from .database import SessionLocal
+from .inference import generate_text
+from .model_utils import validate_prompt
 from sqlalchemy.orm import Session
 
 app = FastAPI()
@@ -34,3 +36,12 @@ def login(email: str, password: str, db: Session = Depends(get_db)):
     if not user or not verify_password(password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
     return {"message": "Logged in"}
+
+@app.post("/predict")
+def predict(prompt: str):
+    try:
+        validate_prompt(prompt)
+        result = generate_text(prompt)
+        return {"response": result}
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
